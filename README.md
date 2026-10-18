@@ -1,29 +1,40 @@
 # Open Pulse
 
-A live dashboard of free public data: weather and air quality, crypto and currency markets, earthquakes, the International Space Station, world economies, tech news and Wikipedia.
+A live dashboard of free public data: weather, air quality, crypto and currency markets, earthquakes and natural events, the International Space Station, world economies, tech news and Wikipedia.
 
-Everything runs in the visitor's browser. There is no server, no build step, no sign-up and no API key. The whole app is one file, `index.html`.
+Everything runs in the visitor's browser. There is no server, no build step, no sign-up and no API key. The app is one page, `index.html`, plus the files that let it install and work offline.
 
 ## What it shows
 
 | View | Data | Refreshes |
 |---|---|---|
-| Overview | One card per area below | Follows each source |
-| Weather & air | Current conditions, next 48 hours, week ahead, US AQI and pollutants for any place | 10 min (weather), 30 min (air) |
+| Overview | A daily briefing and one card per area | Follows each source |
+| My dashboard | The cards you pin, in your order, plus alerts | Follows each source |
+| Weather | Current conditions, next 48 hours, week ahead, and this week against the 1991–2020 normal | 10 min |
+| Air quality | Pollutant breakdown, best time to go outside, 5-day forecast, up to 8 places compared, 3-month calendar | 30 min (15 min for places) |
 | Markets | Top 20 cryptocurrencies with 7-day charts, whole-market stats, a 30-currency converter and rate history | 2 min (crypto), hourly (rates) |
-| Earthquakes | Map, sortable list and magnitude chart for the past hour, day, week or month | 2 min |
+| Earth events | Earthquakes (map, list, magnitude chart) and NASA's open wildfires, storms, volcanoes and ice events | 2 min (quakes), 30 min (events) |
 | Space station | Live ISS position every 5 seconds, its last 45 minutes and next 95 minutes of orbit | 5 s |
 | Economy | 12 World Bank measures since 1990 for up to six countries or regions | 6 h |
 | Tech news | Hacker News top, new, best, Ask HN and Show HN | 5 min |
 | Wikipedia | Most-read articles, featured article, picture of the day, news, on this day | Hourly |
 
-Visitors pick their own place and currency. Those choices, the theme and a few view settings are kept in their own browser's local storage and never leave it.
+## Features
+
+- **My dashboard:** pin any card from any page, reorder by dragging or with the arrow buttons.
+- **Best time to go outside:** the two daylight hours with the cleanest air, ruling out likely rain, very high UV and extreme heat.
+- **Alerts** while a tab is open: air quality above a limit, a strong earthquake, or a big price move. Shown on the page and as browser notifications if allowed.
+- **Share links:** the Share button copies a link that opens the same page for the same place, e.g. `?place=Delhi&lat=28.6139&lon=77.209#air`. `?city=London` also works.
+- **Install as an app** on phone or desktop, and see the last saved data when offline.
+
+Visitors' choices (place, currency, saved places, pinned cards, alerts, theme) stay in their own browser's local storage and never leave it. "Use my location" rounds the position to about 1 km.
 
 ## Data sources
 
 All free and keyless, called directly from the browser:
 
-- [Open-Meteo](https://open-meteo.com/): forecast, geocoding and air quality (CC BY 4.0)
+- [Open-Meteo](https://open-meteo.com/): forecast, geocoding, air quality (CAMS) and historical weather (ERA5) (CC BY 4.0)
+- [NASA EONET](https://eonet.gsfc.nasa.gov/): open natural events
 - [CoinGecko](https://www.coingecko.com/): crypto prices and market data (public API)
 - [Frankfurter](https://frankfurter.dev/): European Central Bank reference rates
 - [USGS Earthquake Hazards Program](https://earthquake.usgs.gov/earthquakes/feed/): GeoJSON feeds
@@ -48,7 +59,7 @@ Then open http://localhost:8765.
 
 ## Host it
 
-Upload `index.html` to any static host: GitHub Pages, Netlify, Cloudflare Pages or Vercel. No configuration is needed.
+Upload all the files to any static host: GitHub Pages, Netlify, Cloudflare Pages or Vercel. No configuration is needed.
 
 ## Disclaimer
 

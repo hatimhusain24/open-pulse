@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Open Pulse</title>
 <meta name="description" content="A live dashboard of free public data: weather, air quality, crypto and currency markets, earthquakes, the International Space Station, world economies, tech news and Wikipedia.">
+<meta name="theme-color" content="#0b6a55">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -22,6 +25,8 @@
   --good-ink:#006300; --bad-ink:#b3292b;
   --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300; --s7:#4a3aa7; --s8:#e34948;
   --tile-filter:none;
+  /* US AQI category colours (EPA scale, toned slightly so text stays legible beside them) */
+  --aq0:#c2ccc5; --aq1:#2fb344; --aq2:#efc20f; --aq3:#f08a24; --aq4:#e0342f; --aq5:#8f3f97; --aq6:#7e0023;
   --font-display:"Bricolage Grotesque", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-body:"Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-data:"JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
@@ -245,6 +250,48 @@ tr.pick[aria-selected="true"] td{background:var(--accent-soft)}
 .otd{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
 .otd li{display:grid;grid-template-columns:3.6em minmax(0,1fr);gap:10px}
 .otd b{font:500 14px var(--font-data);color:var(--accent)}
+/* cards, pinning, dashboard */
+.ov .wide{grid-column:1/-1}
+.ph .aside{display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pin{font:600 12px/1 var(--font-body);color:var(--ink-2);background:var(--panel);border:1px solid var(--line-strong);border-radius:999px;padding:5px 10px;cursor:pointer}
+.pin:hover{border-color:var(--accent)}
+.pin[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--ink)}
+.card-ctl{display:inline-flex;gap:4px}
+.icon-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--ink-2);cursor:pointer;font-size:14px;line-height:1;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.icon-btn:hover{border-color:var(--accent);color:var(--ink)}
+#mine [data-card]{cursor:grab}
+#mine [data-card].dragging{opacity:.45}
+#mine [data-card].drag-over{outline:2px dashed var(--accent);outline-offset:2px}
+.brief{display:flex;flex-direction:column;gap:8px;font-size:15.5px;line-height:1.55}
+.brief p{margin:0;max-width:80ch;overflow-wrap:anywhere}
+/* AQI colours */
+.aq0{--aqc:var(--aq0)}.aq1{--aqc:var(--aq1)}.aq2{--aqc:var(--aq2)}.aq3{--aqc:var(--aq3)}.aq4{--aqc:var(--aq4)}.aq5{--aqc:var(--aq5)}.aq6{--aqc:var(--aq6)}
+.st-aq1 i{background:var(--aq1)}.st-aq2 i{background:var(--aq2)}.st-aq3 i{background:var(--aq3)}.st-aq4 i{background:var(--aq4)}.st-aq5 i{background:var(--aq5)}.st-aq6 i{background:var(--aq6)}
+.legend i.aq0,.legend i.aq1,.legend i.aq2,.legend i.aq3,.legend i.aq4,.legend i.aq5,.legend i.aq6{background:var(--aqc)}
+.legend i.dash{background:none;border-top:2px dashed;height:0;width:14px;border-radius:0}
+.legend i.ev-key{background:var(--panel);border:2.5px solid;border-radius:50%}
+.sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px;vertical-align:baseline;background:var(--aqc)}
+.hours{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:4px}
+.hr{display:flex;flex-direction:column;align-items:center;min-width:38px;padding:5px 2px;border-radius:6px;font:500 11px/1.25 var(--font-data);font-variant-numeric:tabular-nums;background:color-mix(in srgb,var(--aqc) 26%,var(--panel));border:2px solid transparent;color:var(--ink)}
+.hr b{font-weight:500;color:var(--ink-2)}
+.hr.best{border-color:var(--ink)}
+.hr.bad{background:repeating-linear-gradient(135deg,var(--panel-2) 0 4px,var(--panel) 4px 8px);color:var(--muted)}
+.cal-wrap{overflow-x:auto;padding-bottom:2px}
+.cal{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,14px);grid-auto-columns:14px;gap:3px;width:max-content}
+.cal i{border-radius:3px;background:var(--aqc,var(--panel-2))}
+.cal i.pad{background:none}
+.place-add{position:relative;max-width:420px}
+.res-list{list-style:none;margin:6px 0 0;padding:0;max-height:240px;overflow:auto}
+.res-list:empty{display:none}
+.res-list li button,.pop li button{width:100%;text-align:left;background:none;border:0;color:var(--ink);padding:8px;border-radius:6px;cursor:pointer;font:inherit}
+.res-list li button:hover,.res-list li button:focus-visible{background:var(--accent-soft)}
+.res-list li small{display:block;color:var(--muted)}
+.alerts{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:10px 14px;align-items:center;max-width:620px}
+.num-inp{width:110px}
+.offline{background:color-mix(in srgb,var(--warn) 22%,var(--bg));color:var(--ink);text-align:center;padding:8px 16px;font-size:14px;border-bottom:1px solid var(--line)}
+#toasts{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:1300;display:flex;flex-direction:column;gap:8px;width:min(360px,calc(100vw - 32px))}
+.toast{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;background:var(--panel);color:var(--ink);border:1px solid var(--line-strong);border-radius:10px;padding:10px 10px 10px 14px;box-shadow:0 10px 28px rgba(0,0,0,.18);font-size:14px;overflow-wrap:anywhere}
+.toast p{margin:2px 0 0;color:var(--ink-2)}
 footer{max-width:1440px;margin:0 auto;padding:0 16px 40px;color:var(--muted);font-size:13px}
 footer p{margin:0 0 6px;max-width:90ch}
 footer a{color:var(--ink-2)}
@@ -270,11 +317,15 @@ footer a{color:var(--ink-2)}
       <label class="sr" for="cur-sel">Currency</label>
       <select id="cur-sel" class="btn" title="Currency for prices"></select>
       <button id="refresh" class="btn" type="button" title="Refresh this page’s data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg>Refresh</button>
+      <button id="share" class="btn" type="button" title="Copy a link to this page and place"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>Share</button>
+      <button id="install" class="btn" type="button" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 21h16"/></svg>Install app</button>
       <button id="theme" class="btn" type="button" aria-label="Change theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg><span id="theme-lbl">Auto</span></button>
     </div>
   </div>
 </header>
 
+<div id="offline" class="offline" role="status" hidden>You’re offline. Showing the last data saved on this device; it refreshes when you reconnect.</div>
+<div id="toasts" aria-live="polite"></div>
 <div class="shell">
   <nav class="side" aria-label="Data areas"><ul id="nav"></ul>
     <p class="side-note">Every panel names its source and refreshes on its own. Nothing to sign up for, no keys, no cookies.</p>
@@ -377,7 +428,17 @@ const settings = {
   wikiLang: store.get('wikiLang', 'en'),
   wbIndicator: store.get('wbIndicator', 'NY.GDP.MKTP.CD'),
   wbCountries: store.get('wbCountries', [{ id: 'IND', i2: 'IN', name: 'India', slot: 0 }, { id: 'USA', i2: 'US', name: 'United States', slot: 1 }, { id: 'CHN', i2: 'CN', name: 'China', slot: 2 }]),
-  follow: store.get('follow', true)
+  follow: store.get('follow', true),
+  pins: store.get('pins', ['brief', 'air', 'best', 'places', 'crypto']),
+  places: store.get('places', [
+    { name: 'Delhi', region: 'Delhi, India', lat: 28.6139, lon: 77.209, slot: 0 },
+    { name: 'Mumbai', region: 'Maharashtra, India', lat: 19.0761, lon: 72.8775, slot: 1 },
+    { name: 'Bengaluru', region: 'Karnataka, India', lat: 12.9716, lon: 77.5946, slot: 2 },
+    { name: 'London', region: 'England, United Kingdom', lat: 51.5074, lon: -0.1278, slot: 3 },
+    { name: 'New York', region: 'New York, United States', lat: 40.7128, lon: -74.006, slot: 4 }
+  ]),
+  alerts: store.get('alerts', null),
+  showEvents: store.get('showEvents', true) !== false
 };
 // Stored values come from the visitor's browser and may be stale or edited by hand: keep only well-formed ones.
 const DEF_CITY = { name: 'Mumbai', region: 'Maharashtra, India', lat: 19.0761, lon: 72.8775 };
@@ -398,6 +459,18 @@ settings.wbCountries = (Array.isArray(settings.wbCountries) ? settings.wbCountri
   .filter(c => c && /^[A-Z0-9]{2,3}$/.test(c.id) && Number.isInteger(c.slot) && c.slot >= 0 && c.slot < 8)
   .filter((c, i, a) => a.findIndex(x => x.id === c.id || x.slot === c.slot) === i).slice(0, 6)
   .map(c => ({ id: c.id, i2: /^[A-Z0-9]{2}$/.test(c.i2) ? c.i2 : '', name: String(c.name || c.id).slice(0, 80), slot: c.slot }));
+const PIN_IDS = ['brief', 'weather', 'air', 'aqnow', 'best', 'aqfc', 'aqtrend', 'places', 'climate', 'events', 'crypto', 'fx', 'quake', 'iss', 'hn', 'wiki', 'econ'];
+settings.pins = (Array.isArray(settings.pins) ? settings.pins : []).filter((p, i, a) => PIN_IDS.includes(p) && a.indexOf(p) === i);
+settings.places = (Array.isArray(settings.places) ? settings.places : [])
+  .filter(p => p && fin(p.lat) && fin(p.lon) && Math.abs(p.lat) <= 90 && Math.abs(p.lon) <= 180 && Number.isInteger(p.slot) && p.slot >= 0 && p.slot < 8)
+  .filter((p, i, a) => a.findIndex(x => x.slot === p.slot) === i).slice(0, 8)
+  .map(p => ({ name: String(p.name || 'Place').slice(0, 80), region: String(p.region || '').slice(0, 120), lat: +p.lat, lon: +p.lon, slot: p.slot }));
+const al = settings.alerts && typeof settings.alerts === 'object' ? settings.alerts : {};
+settings.alerts = {
+  aqi: { on: !!(al.aqi && al.aqi.on), above: fin(al.aqi && al.aqi.above) ? Math.min(500, Math.max(1, Math.round(al.aqi.above))) : 150 },
+  quake: { on: !!(al.quake && al.quake.on), min: fin(al.quake && al.quake.min) ? Math.min(9.5, Math.max(4.5, +al.quake.min)) : 6 },
+  coin: { on: !!(al.coin && al.coin.on), pct: fin(al.coin && al.coin.pct) ? Math.min(90, Math.max(1, +al.coin.pct)) : 5, id: typeof (al.coin && al.coin.id) === 'string' && /^[a-z0-9-]{1,64}$/.test(al.coin.id) ? al.coin.id : 'bitcoin' }
+};
 const save = k => store.set(k, settings[k]);
 const fxPair = () => { let p = settings.fxPair; if (!p || p === settings.currency || !FX_ALL.includes(p)) p = settings.currency === 'USD' ? 'EUR' : 'USD'; return p; };
 const rangeStart = r => { const days = { '1M': 31, '3M': 92, '1Y': 366, '5Y': 1827 }[r] || 92; return isoDate(new Date(Date.now() - days * 864e5)); };
@@ -431,12 +504,36 @@ let issTrail = [];
 const SRC = {
   weather: { name: 'Open-Meteo', home: 'https://open-meteo.com/', ttl: 10 * 60e3, load: () => {
     const c = settings.city;
-    return getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,wind_direction_10m,precipitation,weather_code,is_day,pressure_msl&hourly=temperature_2m,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_sum,precipitation_probability_max&timezone=auto&forecast_days=7`);
+    return getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,wind_direction_10m,precipitation,weather_code,is_day,pressure_msl&hourly=temperature_2m,precipitation_probability,uv_index,apparent_temperature,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_sum,precipitation_probability_max&timezone=auto&forecast_days=7`);
   } },
   aqi: { name: 'Open-Meteo Air Quality', home: 'https://open-meteo.com/en/docs/air-quality-api', ttl: 30 * 60e3, load: () => {
     const c = settings.city;
-    return getJSON(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${c.lat}&longitude=${c.lon}&current=us_aqi,pm2_5,pm10,ozone,nitrogen_dioxide,carbon_monoxide&hourly=us_aqi&timezone=auto&forecast_days=2`);
+    // Past 92 days feed the 3-month calendar; the next 5 days feed the forecast and best-time cards.
+    return getJSON(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${c.lat}&longitude=${c.lon}&current=us_aqi,us_aqi_pm2_5,us_aqi_pm10,us_aqi_ozone,us_aqi_nitrogen_dioxide,us_aqi_sulphur_dioxide,us_aqi_carbon_monoxide,pm2_5,pm10,ozone,nitrogen_dioxide,sulphur_dioxide,carbon_monoxide&hourly=us_aqi&past_days=92&forecast_days=5&timezone=auto`, 25000);
   } },
+  places: { name: 'Open-Meteo', home: 'https://open-meteo.com/', ttl: 15 * 60e3, load: async () => {
+    const P = settings.places; if (!P.length) return { list: [] };
+    const lat = P.map(p => p.lat).join(','), lon = P.map(p => p.lon).join(',');
+    const [w, a] = await Promise.all([
+      getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&forecast_days=1&timezone=auto`),
+      getJSON(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5&hourly=us_aqi&forecast_days=5&timezone=auto`, 25000)
+    ]);
+    const W = Array.isArray(w) ? w : [w], A = Array.isArray(a) ? a : [a];
+    return { list: P.map((p, i) => ({ ...p, w: W[i], a: A[i] })) };
+  } },
+  climate: { name: 'Open-Meteo historical weather (ERA5)', home: 'https://open-meteo.com/en/docs/historical-weather-api', ttl: 24 * 3600e3, load: async () => {
+    // 30 years of daily highs and lows, averaged by calendar date and smoothed over a week; cached per place in this browser.
+    const c = settings.city, key = `clim:${(+c.lat).toFixed(2)},${(+c.lon).toFixed(2)}`, hit = store.get(key, null);
+    if (hit && hit.v === 1 && hit.norm) return hit;
+    const d = await getJSON(`https://archive-api.open-meteo.com/v1/archive?latitude=${c.lat}&longitude=${c.lon}&start_date=1991-01-01&end_date=2020-12-31&daily=temperature_2m_max,temperature_2m_min&timezone=auto`, 45000);
+    const acc = {};
+    d.daily.time.forEach((t, i) => { const hi = d.daily.temperature_2m_max[i], lo = d.daily.temperature_2m_min[i]; if (!fin(hi) || !fin(lo)) return; const a = acc[t.slice(5)] || (acc[t.slice(5)] = [0, 0, 0]); a[0] += hi; a[1] += lo; a[2]++; });
+    const mds = Object.keys(acc).sort(), norm = {};
+    mds.forEach((md, i) => { let h = 0, l = 0, n = 0; for (let k = -3; k <= 3; k++) { const a = acc[mds[(i + k + mds.length) % mds.length]]; h += a[0]; l += a[1]; n += a[2]; } norm[md] = [+(h / n).toFixed(1), +(l / n).toFixed(1)]; });
+    const out = { v: 1, norm }; store.set(key, out); return out;
+  } },
+  events: { name: 'NASA EONET', home: 'https://eonet.gsfc.nasa.gov/', ttl: 30 * 60e3, load: async () => (await getJSON('https://eonet.gsfc.nasa.gov/api/v3/events?status=open&days=60', 25000)).events || [] },
+  qalert: { name: 'USGS Earthquake Hazards Program', home: 'https://earthquake.usgs.gov/', ttl: 3 * 60e3, load: () => getJSON('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson') },
   crypto: { name: 'CoinGecko', home: 'https://www.coingecko.com/', ttl: 2 * 60e3, load: () =>
     getJSON(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${settings.currency.toLowerCase()}&order=market_cap_desc&per_page=20&page=1&sparkline=true&price_change_percentage=1h,24h,7d`) },
   // The markets sparkline is always in US dollars, so the selected coin's chart is fetched in the chosen currency.
@@ -494,8 +591,9 @@ const SRC = {
     const url = d => `https://api.wikimedia.org/feed/v1/wikipedia/${settings.wikiLang}/featured/${d.getUTCFullYear()}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${String(d.getUTCDate()).padStart(2, '0')}`;
     const today = new Date();
     const feed = await getJSON(url(today));
-    if (!feed.mostread) {
-      const prev = await getJSON(url(new Date(today - 864e5))).catch(() => null);
+    // The most-read list is published a day or two late; step back up to three days to find the latest one.
+    for (let back = 1; !feed.mostread && back <= 3; back++) {
+      const prev = await getJSON(url(new Date(today - back * 864e5))).catch(() => null);
       if (prev && prev.mostread) feed.mostread = prev.mostread;
     }
     return feed;
@@ -528,6 +626,7 @@ async function load(key) {
     const d = await SRC[key].load();
     if (S.req[key] !== token) return;
     S.data[key] = d; S.at[key] = Date.now(); S.status[key] = 'ok'; S.err[key] = null;
+    try { checkAlerts(key); } catch (e) { console.warn('[Open Pulse] alerts', e); }
   } catch (e) {
     if (S.req[key] !== token) return;
     S.status[key] = 'error'; S.err[key] = e.message || String(e); S.fail[key] = Date.now();
@@ -576,11 +675,23 @@ const crosshair = {
     c.save(); c.strokeStyle = css('--line-strong'); c.lineWidth = 1; c.beginPath(); c.moveTo(x, top); c.lineTo(x, bottom); c.stroke(); c.restore();
   }
 };
-function chartOpts({ yFmt = v => v, xFmt, tipTitle, tipLabel, yMin, yMax, legend = false, horizontal = false } = {}) {
+// Shades the US AQI category bands behind an AQI chart.
+const AQ_BANDS = [[0, 50, '--aq1'], [50, 100, '--aq2'], [100, 150, '--aq3'], [150, 200, '--aq4'], [200, 300, '--aq5'], [300, 500, '--aq6']];
+const aqiBands = {
+  id: 'aqiBands',
+  beforeDatasetsDraw(chart) {
+    const { ctx, chartArea: a, scales: { y } } = chart; if (!y || !a) return;
+    ctx.save();
+    AQ_BANDS.forEach(([lo, hi, v]) => { const top = Math.max(a.top, y.getPixelForValue(hi)), bot = Math.min(a.bottom, y.getPixelForValue(lo)); if (bot > top) { ctx.fillStyle = hexA(css(v), 0.14); ctx.fillRect(a.left, top, a.right - a.left, bot - top); } });
+    ctx.restore();
+  }
+};
+function chartOpts({ yFmt = v => v, xFmt, tipTitle, tipLabel, yMin, yMax, legend = false, horizontal = false, allTicks = false } = {}) {
   const muted = css('--muted'), font = { family: css('--font-data') || 'monospace', size: 11 };
   const valueAxis = { grid: { color: css('--grid'), drawTicks: false }, border: { display: false }, ticks: { color: muted, font, maxTicksLimit: 5, padding: 8, callback: v => yFmt(v) }, min: yMin, max: yMax };
   const catAxis = { grid: { display: false }, border: { color: css('--axis') }, ticks: { color: muted, font, maxRotation: 0, autoSkip: true, maxTicksLimit: horizontal ? 12 : 8, padding: 6 } };
   if (xFmt) catAxis.ticks.callback = function (v) { return xFmt(this.getLabelForValue(v), v); };
+  if (allTicks) catAxis.ticks.autoSkip = false;
   return {
     responsive: true, maintainAspectRatio: false, animation: false, indexAxis: horizontal ? 'y' : 'x',
     interaction: { mode: 'index', intersect: false, axis: horizontal ? 'y' : 'x' },
@@ -604,7 +715,7 @@ function lineChart(id, canvas, labels, sets, o = {}) {
   charts[id] = new Chart(canvas, {
     type: 'line',
     data: { labels, datasets: sets.map(s => ({ label: s.label, data: s.data, borderColor: s.color, backgroundColor: s.fill ? hexA(s.color, 0.13) : s.color, fill: s.fill ? 'origin' : false, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4.5, pointHoverBorderWidth: 2, pointHoverBorderColor: css('--panel'), pointHoverBackgroundColor: s.color, tension: 0.25, spanGaps: true, borderDash: s.dash || [] })) },
-    options: chartOpts(o), plugins: [crosshair]
+    options: chartOpts(o), plugins: o.bands ? [aqiBands, crosshair] : [crosshair]
   });
 }
 function barChart(id, canvas, labels, data, color, o = {}) {
@@ -651,13 +762,14 @@ const mag1 = m => Math.round(m * 10) / 10;
 // Index of the forecast day that matches the place's current local date.
 const todayIdx = d => Math.max(0, d.daily.time.indexOf(d.current.time.slice(0, 10)));
 function aqiCat(v) {
-  if (!fin(v)) return { t: 'No reading', s: '', a: 'No current reading for this place.' };
-  if (v <= 50) return { t: 'Good', s: 'good', a: 'Air quality is fine for everyone.' };
-  if (v <= 100) return { t: 'Moderate', s: 'warn', a: 'Unusually sensitive people should limit long or heavy outdoor exertion.' };
-  if (v <= 150) return { t: 'Unhealthy for sensitive groups', s: 'serious', a: 'Children, older adults and people with heart or lung conditions should cut back on outdoor exertion.' };
-  if (v <= 200) return { t: 'Unhealthy', s: 'critical', a: 'Everyone should reduce long or heavy outdoor exertion.' };
-  if (v <= 300) return { t: 'Very unhealthy', s: 'critical', a: 'Avoid outdoor exertion. Sensitive groups should stay indoors.' };
-  return { t: 'Hazardous', s: 'critical', a: 'Stay indoors and keep activity light.' };
+  if (!fin(v)) return { t: 'No reading', s: '', l: 0, a: 'No current reading for this place.' };
+  v = Math.round(v);
+  if (v <= 50) return { l: 1, t: 'Good', s: 'good', a: 'Air quality is fine for everyone.' };
+  if (v <= 100) return { l: 2, t: 'Moderate', s: 'warn', a: 'Unusually sensitive people should limit long or heavy outdoor exertion.' };
+  if (v <= 150) return { l: 3, t: 'Unhealthy for sensitive groups', s: 'serious', a: 'Children, older adults and people with heart or lung conditions should cut back on outdoor exertion.' };
+  if (v <= 200) return { l: 4, t: 'Unhealthy', s: 'critical', a: 'Everyone should reduce long or heavy outdoor exertion.' };
+  if (v <= 300) return { l: 5, t: 'Very unhealthy', s: 'critical', a: 'Avoid outdoor exertion. Sensitive groups should stay indoors.' };
+  return { l: 6, t: 'Hazardous', s: 'critical', a: 'Stay indoors and keep activity light.' };
 }
 const pill = (text, s) => `<span class="pill ${s ? 'st-' + s : ''}"><i aria-hidden="true"></i>${esc(text)}</span>`;
 function hourIdx(d) {
@@ -671,83 +783,312 @@ const magCls = m => (m = mag1(m)) >= 7 ? 'm7' : m >= 6 ? 'm6' : m >= 4 ? 'm4' : 
 const VIEWS = [];
 const view = v => VIEWS.push(v);
 
+/* ---------- cards: shared by Overview, My dashboard and the detail pages ---------- */
+const CARDS = {};
+const card = (id, def) => { CARDS[id] = { id, ...def }; };
+function cardTop(el, title) {
+  const id = el.dataset.card, c = CARDS[id], ctx = el.dataset.ctx;
+  const open = c.href && ctx !== 'view' ? `<a class="ov-open" href="${c.href}">Open</a>` : '';
+  let ctl;
+  if (ctx === 'mine') {
+    ctl = `<span class="card-ctl"><button type="button" class="icon-btn" data-mv="${id}|-1" aria-label="Move ${esc(c.name)} earlier">←</button><button type="button" class="icon-btn" data-mv="${id}|1" aria-label="Move ${esc(c.name)} later">→</button><button type="button" class="icon-btn" data-unpin="${id}" aria-label="Remove ${esc(c.name)} from My dashboard">×</button></span>`;
+  } else {
+    const on = settings.pins.includes(id);
+    ctl = `<button type="button" class="pin" data-pin="${id}" aria-pressed="${on}" aria-label="${on ? 'Remove' : 'Add'} ${esc(c.name)} ${on ? 'from' : 'to'} My dashboard">${on ? 'Pinned' : 'Pin'}</button>`;
+  }
+  return `<div class="ph"><h2>${title}</h2><span class="aside">${open}${ctl}</span></div>`;
+}
+const cardRegion = (id, scope = '#main') => ({ sel: `${scope} [data-card="${id}"]`, keys: CARDS[id].keys, render: el => CARDS[id].render(el) });
+const cardHTML = (id, ctx) => `<section class="panel${CARDS[id].wide ? ' wide' : ''}" data-card="${id}" data-ctx="${ctx}"${ctx === 'mine' ? ' draggable="true"' : ''}></section>`;
+
+/* air-quality helpers */
+const SUBS = [{ k: 'pm2_5', n: 'PM2.5' }, { k: 'pm10', n: 'PM10' }, { k: 'ozone', n: 'Ozone' }, { k: 'nitrogen_dioxide', n: 'NO₂' }, { k: 'sulphur_dioxide', n: 'SO₂' }, { k: 'carbon_monoxide', n: 'CO' }];
+function mainPollutant(c) {
+  const s = SUBS.map(x => ({ n: x.n, v: c['us_aqi_' + x.k] })).filter(x => fin(x.v)).sort((a, b) => b.v - a.v)[0];
+  return s ? s.n : '';
+}
+function nowIdx(hourly, currentTime) { const now = currentTime.slice(0, 13); const i = hourly.time.findIndex(t => t >= now); return i < 0 ? 0 : i; }
+function peak24(a) { if (!a || !a.hourly) return null; const i0 = nowIdx(a.hourly, a.current.time); const v = a.hourly.us_aqi.slice(i0, i0 + 24).filter(fin); return v.length ? Math.max(...v) : null; }
+// The best two daylight hours left today (or tomorrow) for being outside: lowest AQI, ruling out likely rain, very high UV and extreme heat or cold.
+function bestWindow(wx, aq) {
+  const h = wx.hourly, nowH = wx.current.time.slice(0, 13), today = wx.current.time.slice(0, 10);
+  const aqAt = {}; aq.hourly.time.forEach((t, i) => { aqAt[t] = aq.hourly.us_aqi[i]; });
+  const pick = (day, fromNow) => h.time.map((t, i) => ({ t, i }))
+    .filter(x => x.t.slice(0, 10) === day && (!fromNow || x.t.slice(0, 13) >= nowH) && h.is_day[x.i] === 1)
+    .map(({ t, i }) => {
+      const aqi = aqAt[t], rain = h.precipitation_probability[i], uv = h.uv_index[i], feel = h.apparent_temperature[i];
+      const bad = (fin(rain) && rain >= 50) || (fin(uv) && uv >= 8) || (fin(feel) && (feel >= 40 || feel <= -5));
+      const score = (fin(aqi) ? aqi : 150) + (fin(rain) ? rain : 0) * 0.6 + (fin(uv) ? Math.max(0, uv - 5) * 12 : 0) + (fin(feel) ? Math.max(0, feel - 32) * 6 + Math.max(0, 5 - feel) * 4 : 0);
+      return { t, aqi, rain, uv, feel, bad, score, cat: aqiCat(aqi) };
+    });
+  let when = 'today', hours = pick(today, true);
+  if (hours.length < 2) { const tm = h.time.find(t => t.slice(0, 10) > today); if (tm) { when = 'tomorrow'; hours = pick(tm.slice(0, 10), false); } }
+  hours.forEach(x => { x.tip = `${x.t.slice(11, 16)} · AQI ${fin(x.aqi) ? Math.round(x.aqi) : '–'} ${x.cat.t} · rain ${fin(x.rain) ? x.rain + '%' : '–'} · UV ${fin(x.uv) ? x.uv.toFixed(0) : '–'} · feels ${fin(x.feel) ? Math.round(x.feel) + '°' : '–'}${x.bad ? ' · ruled out' : ''}`; });
+  let best = null;
+  for (let i = 0; i + 1 < hours.length; i++) {
+    const a = hours[i], b = hours[i + 1];
+    if (a.bad || b.bad || +b.t.slice(11, 13) !== +a.t.slice(11, 13) + 1) continue;
+    const s = (a.score + b.score) / 2; if (!best || s < best.s) best = { s, i };
+  }
+  if (!best) return { when, hours, win: null, note: hours.length ? 'rain, UV or heat rule out every daylight hour' : 'no daylight hours left' };
+  const a = hours[best.i], b = hours[best.i + 1]; a.inWin = b.inWin = true;
+  const end = String((+b.t.slice(11, 13) + 1) % 24).padStart(2, '0') + ':00';
+  const avg = fin(a.aqi) && fin(b.aqi) ? Math.round((a.aqi + b.aqi) / 2) : null, cat = aqiCat(avg);
+  return { when, hours, win: { label: `${a.t.slice(11, 16)}–${end}`, aqi: avg, cat, why: `AQI about ${avg ?? '–'} (${cat.t}) · rain ${Math.max(a.rain || 0, b.rain || 0)}% · UV ${Math.max(a.uv || 0, b.uv || 0).toFixed(0)}`, caution: cat.l >= 3 } };
+}
+const climNormal = date => S.data.climate?.norm?.[date.slice(5, 10)] || null;
+const diffWord = x => !fin(x) ? '' : x >= 0.5 ? `${x.toFixed(1)}° above` : x <= -0.5 ? `${(-x).toFixed(1)}° below` : 'close to';
+
+/* natural-event helpers */
+const EV = {
+  wildfires: { n: 'Wildfires', many: 'wildfires', c: '--s2' }, severeStorms: { n: 'Severe storms', many: 'severe storms', c: '--s1' },
+  volcanoes: { n: 'Volcanoes', many: 'volcanoes', c: '--s8' }, seaLakeIce: { n: 'Sea and lake ice', many: 'ice events', c: '--s3' },
+  floods: { n: 'Floods', many: 'floods', c: '--s7' }, dustHaze: { n: 'Dust and haze', many: 'dust and haze events', c: '--s4' },
+  landslides: { n: 'Landslides', many: 'landslides', c: '--s5' }, drought: { n: 'Drought', many: 'droughts', c: '--s6' }
+};
+const evCat = e => (e.categories && e.categories[0] && e.categories[0].id) || 'other';
+const evMeta = id => EV[id] || { n: 'Other events', many: 'other events', c: '--s5' };
+function evPoint(e) {
+  const g = e.geometry && e.geometry[e.geometry.length - 1]; if (!g) return null;
+  let c = g.coordinates; if (g.type === 'Polygon') c = c && c[0] && c[0][0];
+  return c && fin(c[0]) && fin(c[1]) ? { lat: +c[1], lon: +c[0], date: g.date, mag: g.magnitudeValue, unit: g.magnitudeUnit } : null;
+}
+function evCounts(list) { const n = {}; list.forEach(e => { const k = evCat(e); n[k] = (n[k] || 0) + 1; }); return n; }
+const QLVL = { 'significant': 'significant', '4.5': 'M4.5+', '2.5': 'M2.5+', '1.0': 'M1+', 'all': '' };
+
+card('brief', { name: 'Daily briefing', wide: true, keys: ['weather', 'aqi', 'climate', 'crypto', 'fx', 'quakes', 'events', 'hn', 'wiki'], render(el) {
+  const top = cardTop(el, 'Daily briefing · ' + esc(new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })));
+  const D = S.data, lines = [];
+  if (D.weather) {
+    const d = D.weather, c = d.current, t = todayIdx(d), hi = d.daily.temperature_2m_max[t], n = climNormal(d.daily.time[t]);
+    lines.push(`<p><b>${esc(settings.city.name)}:</b> ${Math.round(c.temperature_2m)}°C and ${esc(wmo(c.weather_code).toLowerCase())}, heading for a high of ${Math.round(hi)}°${n ? ` (${diffWord(hi - n[0])} the 1991–2020 average for today)` : ''} and a low of ${Math.round(d.daily.temperature_2m_min[t])}°. <a href="#weather">Weather</a></p>`);
+  }
+  if (D.aqi) {
+    const c = D.aqi.current, k = aqiCat(c.us_aqi), dom = mainPollutant(c), b = D.weather ? bestWindow(D.weather, D.aqi) : null;
+    lines.push(`<p><b>Air:</b> ${esc(k.t.toLowerCase())}${fin(c.us_aqi) ? ` (US AQI ${Math.round(c.us_aqi)})` : ''}${dom ? `, mostly from ${esc(dom)}` : ''}.${b && b.win ? ` Best time to be outside ${b.when}: ${esc(b.win.label)}.` : ''} <a href="#air">Air quality</a></p>`);
+  }
+  const mk = [];
+  if (D.crypto && D.crypto[0]) { const r = D.crypto[0]; mk.push(`${esc(r.name)} is ${fmtMoney(r.current_price)}, ${delta(r.price_change_percentage_24h_in_currency, 1)} in 24 hours`); }
+  if (D.fx) { const p = settings.currency === 'USD' ? 'EUR' : 'USD'; if (D.fx.rates[p]) mk.push(`1 ${p} buys ${fmtMoney(1 / D.fx.rates[p])}`); }
+  if (mk.length) lines.push(`<p><b>Markets:</b> ${mk.join('; ')}. <a href="#markets">Markets</a></p>`);
+  const ea = [];
+  if (D.quakes) {
+    const f = D.quakes.features.filter(q => fin(q.properties.mag));
+    const big = f.reduce((a, b) => (!a || b.properties.mag > a.properties.mag) ? b : a, null);
+    ea.push(`${f.length} ${QLVL[settings.quakeLevel] ? QLVL[settings.quakeLevel] + ' ' : ''}earthquakes in the past ${settings.quakePeriod}${big ? `, the strongest M${mag1(big.properties.mag).toFixed(1)} ${esc(big.properties.place || '')}` : ''}`);
+  }
+  if (D.events) { const n = Object.entries(evCounts(D.events)).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k, v]) => `${v} ${evMeta(k).many}`); if (n.length) ea.push(`NASA is tracking ${n.join(', ')}`); }
+  if (ea.length) lines.push(`<p><b>Earth:</b> ${ea.join('. ')}. <a href="#earth">Earth events</a></p>`);
+  const rd = [];
+  const hn = D.hn && D.hn.items[0]; if (hn) rd.push(`Top on Hacker News: “<a href="${hn.url ? safeUrl(hn.url) : 'https://news.ycombinator.com/item?id=' + encodeURIComponent(hn.id)}" target="_blank" rel="noopener">${esc(hn.title)}</a>”`);
+  const wk = D.wiki ? wikiTop(1)[0] : null; if (wk) rd.push(`most read on Wikipedia: <a href="${safeUrl(wk.content_urls?.desktop?.page)}" target="_blank" rel="noopener">${esc(wk.titles?.normalized || wk.title)}</a>`);
+  if (rd.length) lines.push(`<p><b>Reading:</b> ${rd.join('; ')}.</p>`);
+  el.innerHTML = top + (lines.length ? `<div class="brief">${lines.join('')}</div>` : (gate(['weather']) || ''));
+} });
+
+card('weather', { name: 'Weather', href: '#weather', keys: ['weather'], render(el) {
+  const top = cardTop(el, 'Weather · ' + esc(settings.city.name));
+  const g = gate(['weather']); if (g) return el.innerHTML = top + g;
+  const d = S.data.weather, c = d.current, t = todayIdx(d);
+  el.innerHTML = top + `<div class="now"><div class="big">${Math.round(c.temperature_2m)}°<small>C</small></div><div><div class="cond">${esc(wmo(c.weather_code))}</div><div class="muted sm">Feels like ${Math.round(c.apparent_temperature)}° · High ${Math.round(d.daily.temperature_2m_max[t])}° · Low ${Math.round(d.daily.temperature_2m_min[t])}°</div></div></div>` + srcLine(['weather']);
+} });
+
+card('air', { name: 'Air quality', href: '#air', keys: ['aqi'], render(el) {
+  const top = cardTop(el, 'Air quality · ' + esc(settings.city.name));
+  const g = gate(['aqi']); if (g) return el.innerHTML = top + g;
+  const c = S.data.aqi.current, k = aqiCat(c.us_aqi), dom = mainPollutant(c);
+  el.innerHTML = top + `<div class="now"><div class="big">${fin(c.us_aqi) ? Math.round(c.us_aqi) : '—'}<small>US AQI</small></div>${pill(k.t, 'aq' + k.l)}</div><div class="muted sm">${dom ? `Main pollutant ${esc(dom)} · ` : ''}PM2.5 ${fmtNum(c.pm2_5, 1)} µg/m³ · PM10 ${fmtNum(c.pm10, 1)} µg/m³</div>` + srcLine(['aqi']);
+} });
+
+card('aqnow', { name: 'What’s in the air', href: '#air', keys: ['aqi'], render(el) {
+  const top = cardTop(el, 'What’s in the air · ' + esc(settings.city.name));
+  const g = gate(['aqi']); if (g) return el.innerHTML = top + g;
+  const c = S.data.aqi.current, k = aqiCat(c.us_aqi), dom = mainPollutant(c);
+  const subs = SUBS.map(s => ({ ...s, v: c['us_aqi_' + s.k], raw: c[s.k] })).filter(s => fin(s.v));
+  el.innerHTML = top + `<div class="now"><div class="big">${fin(c.us_aqi) ? Math.round(c.us_aqi) : '—'}<small>US AQI</small></div><div>${pill(k.t, 'aq' + k.l)}<div class="muted sm" style="margin-top:6px;max-width:48ch">${esc(k.a)}${dom ? ` The main pollutant is ${esc(dom)}.` : ''}</div></div></div>
+    <div class="muted sm">Each pollutant’s own index. The overall AQI is the highest of these.</div><div class="chart h160"><canvas aria-label="US AQI for each pollutant"></canvas></div>
+    <dl class="kv">${subs.map(s => `<div><dt>${s.n}</dt><dd>${fmtNum(s.raw, s.k === 'carbon_monoxide' ? 0 : 1)} µg/m³</dd></div>`).join('')}</dl>` + srcLine(['aqi']);
+  barChart('aqnow-' + el.dataset.ctx, el.querySelector('canvas'), subs.map(s => s.n), subs.map(s => s.v), subs.map(s => css('--aq' + aqiCat(s.v).l)), { horizontal: true, label: 'AQI', yMin: 0, yFmt: v => Math.round(v), tipLabel: x => `AQI ${Math.round(x.parsed.x)} · ${aqiCat(x.parsed.x).t}` });
+} });
+
+card('best', { name: 'Best time to go outside', href: '#air', keys: ['weather', 'aqi'], render(el) {
+  const top = cardTop(el, 'Best time outside · ' + esc(settings.city.name));
+  const g = gate(['weather', 'aqi']); if (g) return el.innerHTML = top + g;
+  const b = bestWindow(S.data.weather, S.data.aqi);
+  el.innerHTML = top + `<div><div class="mid">${b.win ? esc(b.win.label) : 'No good window'}</div><div class="muted sm">${b.when === 'today' ? 'Today' : 'Tomorrow'} · ${esc(b.win ? b.win.why : b.note)}</div>${b.win && b.win.caution ? '<div class="sm" style="margin-top:4px">Even then the air is unhealthy for sensitive groups, so keep it short.</div>' : ''}</div>
+    ${b.hours.length ? `<ul class="hours" aria-label="Daylight hours ${b.when} with forecast AQI">${b.hours.map(h => `<li class="hr aq${h.cat.l}${h.inWin ? ' best' : ''}${h.bad ? ' bad' : ''}" title="${esc(h.tip)}"><b>${h.t.slice(11, 13)}</b><span>${fin(h.aqi) ? Math.round(h.aqi) : '–'}</span><span class="sr">${esc(h.tip)}</span></li>`).join('')}</ul>
+    <div class="muted sm">One box per daylight hour, showing its forecast AQI. Crossed-out hours are ruled out by likely rain, very high UV or extreme heat.</div>` : ''}` + srcLine(['weather', 'aqi'], 'Open-Meteo');
+} });
+
+card('aqfc', { name: 'Air forecast, 5 days', href: '#air', keys: ['aqi'], render(el) {
+  const top = cardTop(el, 'Air forecast, next 5 days · ' + esc(settings.city.name));
+  const g = gate(['aqi']); if (g) return el.innerHTML = top + g;
+  const h = S.data.aqi.hourly, i0 = nowIdx(h, S.data.aqi.current.time);
+  el.innerHTML = top + `<div class="chart h220"><canvas aria-label="Hourly US AQI forecast for the next 5 days"></canvas></div><div class="muted sm">Shaded bands are the US AQI categories, from good (bottom) upwards.</div>` + srcLine(['aqi']);
+  lineChart('aqfc-' + el.dataset.ctx, el.querySelector('canvas'), h.time.slice(i0), [{ label: 'US AQI', data: h.us_aqi.slice(i0), color: css('--ink-2') }], {
+    bands: true, allTicks: true, yMin: 0, xFmt: l => l.slice(11, 13) === '00' ? dayShort(l) : '', tipTitle: l => dayShort(l) + ', ' + hourLbl(l),
+    yFmt: v => Math.round(v), tipLabel: x => `US AQI ${Math.round(x.parsed.y)} · ${aqiCat(x.parsed.y).t}`
+  });
+} });
+
+card('aqtrend', { name: 'Air over 3 months', href: '#air', keys: ['aqi'], render(el) {
+  const top = cardTop(el, 'Air over the last 3 months · ' + esc(settings.city.name));
+  const g = gate(['aqi']); if (g) return el.innerHTML = top + g;
+  const h = S.data.aqi.hourly, today = S.data.aqi.current.time.slice(0, 10), peak = {};
+  h.time.forEach((t, i) => { const d = t.slice(0, 10), v = h.us_aqi[i]; if (d > today || !fin(v)) return; peak[d] = Math.max(peak[d] ?? -1, v); });
+  const ds = Object.keys(peak).sort(); if (!ds.length) return el.innerHTML = top + '<p class="muted">No past readings for this place.</p>';
+  const all = []; for (let d = new Date(ds[0] + 'T12:00Z'); isoDate(d) <= today; d = new Date(+d + 864e5)) all.push(isoDate(d));
+  const pad = (new Date(all[0] + 'T12:00Z').getUTCDay() + 6) % 7, counts = [0, 0, 0, 0, 0, 0, 0];
+  const NAMES = ['No data', 'Good', 'Moderate', 'Unhealthy for sensitive groups', 'Unhealthy', 'Very unhealthy', 'Hazardous'];
+  const fmtD = d => new Date(d + 'T12:00Z').toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
+  const cells = Array(pad).fill('<i class="pad"></i>').concat(all.map(d => {
+    if (!fin(peak[d])) { counts[0]++; return `<i class="aq0" title="${esc(fmtD(d))}: no data"></i>`; }
+    const k = aqiCat(peak[d]); counts[k.l]++;
+    return `<i class="aq${k.l}" title="${esc(fmtD(d))}: peak AQI ${Math.round(peak[d])}, ${esc(k.t)}"></i>`;
+  }));
+  const summary = NAMES.map((n, i) => i && counts[i] ? `${counts[i]} ${n.toLowerCase()}` : '').filter(Boolean).join(', ');
+  el.innerHTML = top + `<div class="cal-wrap"><div class="cal" role="img" aria-label="Daily peak AQI over ${all.length} days: ${esc(summary)}">${cells.join('')}</div></div>
+    <div class="legend">${NAMES.map((n, i) => i && counts[i] ? `<span><i class="aq${i}"></i>${n} <b class="mono">${counts[i]}</b></span>` : '').join('')}</div>
+    <div class="muted sm">One square per day, Monday at the top of each column, coloured by the day’s highest hourly US AQI. Modelled data from the Copernicus Atmosphere Monitoring Service.</div>` + srcLine(['aqi']);
+} });
+
+card('places', { name: 'Your places', href: '#air', wide: true, keys: ['places'], render(el) {
+  const top = cardTop(el, 'Your places');
+  if (!settings.places.length) return el.innerHTML = top + '<p class="muted">No saved places yet. Add some on the <a href="#air">Air quality</a> page.</p>';
+  const g = gate(['places']); if (g) return el.innerHTML = top + g;
+  el.innerHTML = top + `<div class="tbl"><table><thead><tr><th>Place</th><th class="num">Now</th><th>Conditions</th><th>Air now</th><th class="num">PM2.5</th><th class="num">Worst AQI, next 24 h</th><th><span class="sr">Actions</span></th></tr></thead><tbody>${S.data.places.list.map((p, i) => {
+    const w = (p.w && p.w.current) || {}, a = (p.a && p.a.current) || {}, k = aqiCat(a.us_aqi), pk = peak24(p.a), pc = aqiCat(pk), main = Math.abs(p.lat - settings.city.lat) < 0.01 && Math.abs(p.lon - settings.city.lon) < 0.01;
+    return `<tr><td><span class="sw" style="background:var(${SERIES[p.slot]})" aria-hidden="true"></span><b>${esc(p.name)}</b> <span class="muted sm">${esc(p.region || '')}</span></td><td class="num">${fin(w.temperature_2m) ? Math.round(w.temperature_2m) + '°' : '—'}</td><td>${esc(wmo(w.weather_code))}</td><td>${fin(a.us_aqi) ? `<span class="mono">${Math.round(a.us_aqi)}</span> ${pill(k.t, 'aq' + k.l)}` : '—'}</td><td class="num">${fmtNum(a.pm2_5, 1)}</td><td class="num">${fin(pk) ? `<span class="sw aq${pc.l}" aria-hidden="true"></span>${Math.round(pk)}` : '—'}</td><td>${main ? '<span class="muted sm">Main place</span>' : `<button type="button" class="btn sm" data-usep="${i}">Make main</button>`}</td></tr>`;
+  }).join('')}</tbody></table></div>` + srcLine(['places'], 'Open-Meteo');
+} });
+
+card('climate', { name: 'Today vs normal', href: '#weather', keys: ['weather', 'climate'], render(el) {
+  const top = cardTop(el, 'Compared with normal · ' + esc(settings.city.name));
+  const g = gate(['weather', 'climate']); if (g) return el.innerHTML = top + g;
+  const dl = S.data.weather.daily, t0 = todayIdx(S.data.weather), days = dl.time.slice(t0);
+  const hi = dl.temperature_2m_max.slice(t0), lo = dl.temperature_2m_min.slice(t0);
+  const nHi = days.map(d => (climNormal(d) || [null])[0]), nLo = days.map(d => (climNormal(d) || [null, null])[1]);
+  const dHi = fin(hi[0]) && fin(nHi[0]) ? hi[0] - nHi[0] : null;
+  const big = fin(dHi) ? (dHi >= 0 ? '+' : '−') + Math.abs(dHi).toFixed(1) + '°' : '—';
+  const text = fin(dHi) ? `Today’s forecast high of ${Math.round(hi[0])}°C is ${diffWord(dHi)} the 1991–2020 average high for this date (${fmtNum(nHi[0], 1)}°C).` : 'No long-term average for this date.';
+  const chart = el.dataset.ctx !== 'ov';
+  el.innerHTML = top + `<div class="now"><div class="big">${big}</div><div class="muted" style="max-width:46ch">${esc(text)}</div></div>` + (chart ? `
+    <div class="legend"><span><i style="background:${css('--s2')}"></i>Forecast high</span><span><i class="dash" style="border-color:${css('--s2')}"></i>Normal high</span><span><i style="background:${css('--s1')}"></i>Forecast low</span><span><i class="dash" style="border-color:${css('--s1')}"></i>Normal low</span></div>
+    <div class="chart h220"><canvas aria-label="Forecast highs and lows for the week against the 1991–2020 normals"></canvas></div>` : '') + srcLine(['climate']);
+  if (chart) lineChart('clim-' + el.dataset.ctx, el.querySelector('canvas'), days, [
+    { label: 'Forecast high', data: hi, color: css('--s2') }, { label: 'Normal high', data: nHi, color: css('--s2'), dash: [5, 4] },
+    { label: 'Forecast low', data: lo, color: css('--s1') }, { label: 'Normal low', data: nLo, color: css('--s1'), dash: [5, 4] }
+  ], { xFmt: dayShort, tipTitle: dayShort, yFmt: v => Math.round(v) + '°', tipLabel: x => `${x.dataset.label}: ${fmtNum(x.parsed.y, 1)}°C` });
+} });
+
+card('events', { name: 'Natural events', href: '#earth', keys: ['events'], render(el) {
+  const top = cardTop(el, 'Natural events tracked by NASA');
+  const g = gate(['events']); if (g) return el.innerHTML = top + g;
+  const E = S.data.events, n = evCounts(E);
+  const recent = E.map(e => ({ e, p: evPoint(e) })).filter(x => x.p).sort((a, b) => String(b.p.date).localeCompare(String(a.p.date))).slice(0, el.dataset.ctx === 'view' ? 12 : 4);
+  el.innerHTML = top + `<div class="chips">${Object.entries(n).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<span class="pill"><i style="background:var(${evMeta(k).c})"></i>${esc(evMeta(k).n)} <b class="mono">${v}</b></span>`).join('')}</div>
+    <ul class="ov-rows">${recent.map(({ e, p }) => `<li><span><a href="${safeUrl((e.sources && e.sources[0] && e.sources[0].url) || e.link)}" target="_blank" rel="noopener">${esc(e.title)}</a></span><span class="muted sm mono">${p.date ? ago(Date.parse(p.date)) : ''}</span></li>`).join('')}</ul>
+    <div class="muted sm">Open events from the last 60 days, newest update first.</div>` + srcLine(['events']);
+} });
+
+card('crypto', { name: 'Crypto', href: '#markets', keys: ['crypto'], render(el) {
+  const top = cardTop(el, 'Crypto');
+  const g = gate(['crypto']); if (g) return el.innerHTML = top + g;
+  el.innerHTML = top + `<ul class="ov-rows">${S.data.crypto.slice(0, 4).map(r => `<li><span><b>${esc(r.name)}</b> <span class="muted mono sm">${esc(String(r.symbol).toUpperCase())}</span></span><span class="mono">${fmtMoney(r.current_price)} ${delta(r.price_change_percentage_24h_in_currency)}</span></li>`).join('')}</ul><div class="muted sm">Change over 24 hours</div>` + srcLine(['crypto']);
+} });
+
+card('fx', { name: 'Currency', href: '#markets', keys: ['fx'], render(el) {
+  const top = cardTop(el, 'Currency · ' + settings.currency);
+  const g = gate(['fx']); if (g) return el.innerHTML = top + g;
+  const d = S.data.fx, list = FX_MAJOR.filter(c => c !== settings.currency && d.rates[c]).slice(0, 4);
+  el.innerHTML = top + `<ul class="ov-rows">${list.map(c => `<li><span>1 ${c} <span class="muted sm">${esc(currencyName(c))}</span></span><b class="mono">${fmtMoney(1 / d.rates[c])}</b></li>`).join('')}</ul><div class="muted sm">Reference rates for ${esc(d.date)}</div>` + srcLine(['fx']);
+} });
+
+card('quake', { name: 'Earthquakes', href: '#earth', keys: ['quakes'], render(el) {
+  const top = cardTop(el, 'Earthquakes');
+  const g = gate(['quakes']); if (g) return el.innerHTML = top + g;
+  const f = S.data.quakes.features.filter(q => fin(q.properties.mag));
+  const big = f.reduce((a, b) => (!a || b.properties.mag > a.properties.mag) ? b : a, null);
+  el.innerHTML = top + `<div class="now"><div class="big">${f.length}</div><div class="muted">${esc(feedLabel())}</div></div>${big ? `<div class="sm">Strongest: <span class="mag ${magCls(big.properties.mag)}">M${mag1(big.properties.mag).toFixed(1)}</span> ${esc(big.properties.place || 'Unknown place')}, ${ago(big.properties.time)}</div>` : ''}` + srcLine(['quakes']);
+} });
+
+card('iss', { name: 'Space station', href: '#space', keys: ['iss', 'issWhere'], render(el) {
+  const top = cardTop(el, 'Space station');
+  const g = gate(['iss']); if (g) return el.innerHTML = top + g;
+  const p = S.data.iss, w = S.data.issWhere;
+  el.innerHTML = top + `<div class="mid">${esc(issOver(w))}</div><div class="muted sm mono">${fmtNum(p.latitude, 2)}°, ${fmtNum(p.longitude, 2)}° · ${fmtNum(p.velocity, 0)} km/h · ${fmtNum(p.altitude, 0)} km up</div>` + srcLine(['iss']);
+} });
+
+card('hn', { name: 'Tech news', href: '#tech', keys: ['hn'], render(el) {
+  const top = cardTop(el, 'Tech news');
+  const g = gate(['hn']); if (g) return el.innerHTML = top + g;
+  el.innerHTML = top + `<ul class="ov-rows">${S.data.hn.items.slice(0, 4).map(i => `<li><span><a href="${i.url ? safeUrl(i.url) : 'https://news.ycombinator.com/item?id=' + encodeURIComponent(i.id)}" target="_blank" rel="noopener">${esc(i.title)}</a></span><span class="mono muted sm">${fmtNum(i.score)} pts</span></li>`).join('')}</ul>` + srcLine(['hn']);
+} });
+
+card('wiki', { name: 'Most read on Wikipedia', href: '#wiki', keys: ['wiki'], render(el) {
+  const top = cardTop(el, 'Most read on Wikipedia');
+  const g = gate(['wiki']); if (g) return el.innerHTML = top + g;
+  const arts = wikiTop(4);
+  el.innerHTML = top + (arts.length ? `<ul class="ov-rows">${arts.map(a => `<li><span><a href="${safeUrl(a.content_urls?.desktop?.page)}" target="_blank" rel="noopener">${esc(a.titles?.normalized || a.title)}</a></span><span class="mono muted sm">${fmtCompact(a.views, 1)}</span></li>`).join('')}</ul>` : '<p class="muted">No reading list for today yet.</p>') + srcLine(['wiki']);
+} });
+
+card('econ', { name: 'Economy', href: '#economy', keys: ['wb'], render(el) {
+  const ind = wbInd(), top = cardTop(el, esc(ind.name) + ' · latest');
+  const g = gate(['wb']); if (g) return el.innerHTML = top + g;
+  const L = wbLatest();
+  el.innerHTML = top + `<ul class="ov-rows">${settings.wbCountries.slice(0, 4).map(c => { const v = L[c.id]; return `<li><span>${esc(c.name)}</span><span class="mono">${v ? fmtInd(v.value, ind.unit) + ` <span class="muted sm">${esc(v.date)}</span>` : '—'}</span></li>`; }).join('')}</ul><div class="muted sm">${esc(ind.note)}</div>` + srcLine(['wb']);
+} });
+
 /* Overview */
+const OV_CARDS = ['brief', 'weather', 'air', 'best', 'climate', 'crypto', 'fx', 'quake', 'events', 'iss', 'hn', 'wiki', 'econ', 'places'];
 view({
   id: 'overview', label: 'Overview', title: 'The world right now',
-  intro: 'Eight live feeds from free public sources. Pick a place and a currency at the top, and every panel follows. Open any card for the full view.',
+  intro: 'Live feeds from free public sources, summed up. Pick a place and a currency at the top and every card follows. Pin the cards you care about to My dashboard.',
+  mount(root) { root.insertAdjacentHTML('beforeend', `<div class="ov">${OV_CARDS.map(id => cardHTML(id, 'ov')).join('')}</div>`); },
+  regions: OV_CARDS.map(id => cardRegion(id))
+});
+
+/* My dashboard */
+function wireDrag(box) {
+  if (!box) return;
+  let dragId = null;
+  box.addEventListener('dragstart', e => { const s = e.target.closest && e.target.closest('[data-card]'); if (!s) return; dragId = s.dataset.card; e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', dragId); } catch {} s.classList.add('dragging'); });
+  box.addEventListener('dragend', () => { dragId = null; box.querySelectorAll('.dragging, .drag-over').forEach(x => x.classList.remove('dragging', 'drag-over')); });
+  box.addEventListener('dragover', e => { const s = e.target.closest && e.target.closest('[data-card]'); if (!dragId || !s) return; e.preventDefault(); box.querySelectorAll('.drag-over').forEach(x => { if (x !== s) x.classList.remove('drag-over'); }); if (s.dataset.card !== dragId) s.classList.add('drag-over'); });
+  box.addEventListener('drop', e => {
+    const s = e.target.closest && e.target.closest('[data-card]'); if (!dragId || !s) return; e.preventDefault();
+    const from = settings.pins.indexOf(dragId), to = settings.pins.indexOf(s.dataset.card);
+    if (from < 0 || to < 0 || from === to) return;
+    settings.pins.splice(from, 1); settings.pins.splice(to, 0, dragId); save('pins'); dragId = null; go('mine');
+  });
+}
+view({
+  id: 'mine', label: 'My dashboard', title: 'My dashboard',
+  intro: 'Your own set of cards. Pin cards from any page, add one below, and drag cards (or use the arrows) to reorder. Saved in this browser only.',
   mount(root) {
-    root.insertAdjacentHTML('beforeend', `<div class="ov">
-      <section class="panel" id="ov-weather"></section><section class="panel" id="ov-air"></section>
-      <section class="panel" id="ov-crypto"></section><section class="panel" id="ov-fx"></section>
-      <section class="panel" id="ov-quake"></section><section class="panel" id="ov-iss"></section>
-      <section class="panel" id="ov-hn"></section><section class="panel" id="ov-wiki"></section>
-      <section class="panel" id="ov-econ"></section></div>`);
+    const avail = Object.values(CARDS).filter(c => !settings.pins.includes(c.id));
+    root.insertAdjacentHTML('beforeend', `<div class="bar"><label class="field" for="mine-add"><span>Add a card</span><select id="mine-add" class="btn"><option value="">Choose…</option>${avail.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select></label><button id="mine-addbtn" class="btn" type="button">Add</button>${settings.pins.length ? '<button id="mine-clear" class="btn" type="button">Remove all cards</button>' : ''}</div>
+      ${settings.pins.length ? `<div class="ov" id="mine">${settings.pins.map(id => cardHTML(id, 'mine')).join('')}</div>` : '<section class="panel"><p class="muted" style="margin:0">Your dashboard is empty. Pin cards from Overview or any page, or add one above.</p></section>'}
+      <section class="panel" id="alerts"></section>`);
+    $('#mine-addbtn').addEventListener('click', () => { const id = $('#mine-add').value; if (!id || !CARDS[id]) return; settings.pins.push(id); save('pins'); go('mine'); const s = $('#mine-add'); if (s) s.focus(); });
+    const clr = $('#mine-clear');
+    if (clr) clr.addEventListener('click', () => {
+      if (clr.dataset.armed) { settings.pins = []; save('pins'); go('mine'); return; }
+      clr.dataset.armed = '1'; clr.textContent = 'Click again to remove all';
+      setTimeout(() => { if (clr.isConnected) { delete clr.dataset.armed; clr.textContent = 'Remove all cards'; } }, 4000);
+    });
+    wireDrag($('#mine'));
   },
-  regions: [
-    { sel: '#ov-weather', keys: ['weather'], render(el) {
-      const top = head('Weather · ' + esc(settings.city.name), '<a class="ov-open" href="#weather">Open</a>');
-      const g = gate(['weather']); if (g) return el.innerHTML = top + g;
-      const d = S.data.weather, c = d.current, t = todayIdx(d);
-      el.innerHTML = top + `<div class="now"><div class="big">${Math.round(c.temperature_2m)}°<small>C</small></div><div><div class="cond">${esc(wmo(c.weather_code))}</div><div class="muted sm">Feels like ${Math.round(c.apparent_temperature)}° · High ${Math.round(d.daily.temperature_2m_max[t])}° · Low ${Math.round(d.daily.temperature_2m_min[t])}°</div></div></div>` + srcLine(['weather']);
-    } },
-    { sel: '#ov-air', keys: ['aqi'], render(el) {
-      const top = head('Air quality · ' + esc(settings.city.name), '<a class="ov-open" href="#weather">Open</a>');
-      const g = gate(['aqi']); if (g) return el.innerHTML = top + g;
-      const c = S.data.aqi.current, k = aqiCat(c.us_aqi);
-      el.innerHTML = top + `<div class="now"><div class="big">${fin(c.us_aqi) ? Math.round(c.us_aqi) : '—'}<small>US AQI</small></div>${pill(k.t, k.s)}</div><div class="muted sm">PM2.5 ${fmtNum(c.pm2_5, 1)} µg/m³ · PM10 ${fmtNum(c.pm10, 1)} µg/m³</div>` + srcLine(['aqi']);
-    } },
-    { sel: '#ov-crypto', keys: ['crypto'], render(el) {
-      const top = head('Crypto', '<a class="ov-open" href="#markets">Open</a>');
-      const g = gate(['crypto']); if (g) return el.innerHTML = top + g;
-      const rows = S.data.crypto.slice(0, 4);
-      el.innerHTML = top + `<ul class="ov-rows">${rows.map(r => `<li><span><b>${esc(r.name)}</b> <span class="muted mono sm">${esc(String(r.symbol).toUpperCase())}</span></span><span class="mono">${fmtMoney(r.current_price)} ${delta(r.price_change_percentage_24h_in_currency)}</span></li>`).join('')}</ul><div class="muted sm">Change over 24 hours</div>` + srcLine(['crypto']);
-    } },
-    { sel: '#ov-fx', keys: ['fx'], render(el) {
-      const top = head('Currency · ' + settings.currency, '<a class="ov-open" href="#markets">Open</a>');
-      const g = gate(['fx']); if (g) return el.innerHTML = top + g;
-      const d = S.data.fx, list = FX_MAJOR.filter(c => c !== settings.currency && d.rates[c]).slice(0, 4);
-      el.innerHTML = top + `<ul class="ov-rows">${list.map(c => `<li><span>1 ${c} <span class="muted sm">${esc(currencyName(c))}</span></span><b class="mono">${fmtMoney(1 / d.rates[c])}</b></li>`).join('')}</ul><div class="muted sm">Reference rates for ${esc(d.date)}</div>` + srcLine(['fx']);
-    } },
-    { sel: '#ov-quake', keys: ['quakes'], render(el) {
-      const top = head('Earthquakes', '<a class="ov-open" href="#earth">Open</a>');
-      const g = gate(['quakes']); if (g) return el.innerHTML = top + g;
-      const f = S.data.quakes.features.filter(q => fin(q.properties.mag));
-      const big = f.reduce((a, b) => (!a || b.properties.mag > a.properties.mag) ? b : a, null);
-      el.innerHTML = top + `<div class="now"><div class="big">${f.length}</div><div class="muted">${esc(feedLabel())}</div></div>${big ? `<div class="sm">Strongest: <span class="mag ${magCls(big.properties.mag)}">M${big.properties.mag.toFixed(1)}</span> ${esc(big.properties.place || 'Unknown place')}, ${ago(big.properties.time)}</div>` : ''}` + srcLine(['quakes']);
-    } },
-    { sel: '#ov-iss', keys: ['iss', 'issWhere'], render(el) {
-      const top = head('Space station', '<a class="ov-open" href="#space">Open</a>');
-      const g = gate(['iss']); if (g) return el.innerHTML = top + g;
-      const p = S.data.iss, w = S.data.issWhere;
-      el.innerHTML = top + `<div class="mid">${esc(issOver(w))}</div><div class="muted sm mono">${fmtNum(p.latitude, 2)}°, ${fmtNum(p.longitude, 2)}° · ${fmtNum(p.velocity, 0)} km/h · ${fmtNum(p.altitude, 0)} km up</div>` + srcLine(['iss']);
-    } },
-    { sel: '#ov-hn', keys: ['hn'], render(el) {
-      const top = head('Tech news', '<a class="ov-open" href="#tech">Open</a>');
-      const g = gate(['hn']); if (g) return el.innerHTML = top + g;
-      el.innerHTML = top + `<ul class="ov-rows">${S.data.hn.items.slice(0, 4).map(i => `<li><span><a href="${safeUrl(i.url || 'https://news.ycombinator.com/item?id=' + i.id)}" target="_blank" rel="noopener">${esc(i.title)}</a></span><span class="mono muted sm">${fmtNum(i.score)} pts</span></li>`).join('')}</ul>` + srcLine(['hn']);
-    } },
-    { sel: '#ov-wiki', keys: ['wiki'], render(el) {
-      const top = head('Most read on Wikipedia', '<a class="ov-open" href="#wiki">Open</a>');
-      const g = gate(['wiki']); if (g) return el.innerHTML = top + g;
-      const arts = wikiTop(4);
-      el.innerHTML = top + (arts.length ? `<ul class="ov-rows">${arts.map(a => `<li><span><a href="${safeUrl(a.content_urls?.desktop?.page)}" target="_blank" rel="noopener">${esc(a.titles?.normalized || a.title)}</a></span><span class="mono muted sm">${fmtCompact(a.views, 1)}</span></li>`).join('')}</ul>` : '<p class="muted">No reading list for today yet.</p>') + srcLine(['wiki']);
-    } },
-    { sel: '#ov-econ', keys: ['wb'], render(el) {
-      const ind = wbInd(), top = head(esc(ind.name) + ' · latest', '<a class="ov-open" href="#economy">Open</a>');
-      const g = gate(['wb']); if (g) return el.innerHTML = top + g;
-      const L = wbLatest();
-      el.innerHTML = top + `<ul class="ov-rows">${settings.wbCountries.slice(0, 4).map(c => { const v = L[c.id]; return `<li><span>${esc(c.name)}</span><span class="mono">${v ? fmtInd(v.value, ind.unit) + ` <span class="muted sm">${esc(v.date)}</span>` : '—'}</span></li>`; }).join('')}</ul><div class="muted sm">${esc(ind.note)}</div>` + srcLine(['wb']);
-    } }
-  ]
+  get regions() { return [...settings.pins.filter(id => CARDS[id]).map(id => cardRegion(id, '#mine')), { sel: '#alerts', keys: [], render: renderAlerts }]; }
 });
 
 /* Weather */
 view({
-  id: 'weather', label: 'Weather & air', title: 'Weather and air quality',
+  id: 'weather', label: 'Weather', title: 'Weather',
   intro: 'Current conditions, the next 48 hours and the week ahead, plus what the air is like to breathe. Change the place at the top.',
   mount(root) {
     root.insertAdjacentHTML('beforeend', `<div class="g g-2"><section class="panel" id="w-now"></section><section class="panel" id="w-air"></section></div>
-      <section class="panel" id="w-hours"></section><section class="panel" id="w-week"></section>`);
+      <section class="panel" id="w-hours"></section><section class="panel" id="w-week"></section>${cardHTML('climate', 'view')}`);
   },
   regions: [
     { sel: '#w-now', keys: ['weather'], render(el) {
@@ -761,7 +1102,7 @@ view({
       const top = head('Air quality', 'US AQI scale');
       const g = gate(['aqi']); if (g) return el.innerHTML = top + g;
       const d = S.data.aqi, c = d.current, k = aqiCat(c.us_aqi);
-      el.innerHTML = top + `<div class="now"><div class="big">${fin(c.us_aqi) ? Math.round(c.us_aqi) : '—'}</div><div>${pill(k.t, k.s)}<div class="muted sm" style="margin-top:6px;max-width:44ch">${esc(k.a)}</div></div></div>
+      el.innerHTML = top + `<div class="now"><div class="big">${fin(c.us_aqi) ? Math.round(c.us_aqi) : '—'}</div><div>${pill(k.t, 'aq' + k.l)}<div class="muted sm" style="margin-top:6px;max-width:44ch">${esc(k.a)} <a href="#air">More on air quality</a></div></div></div>
         <dl class="kv"><div><dt>PM2.5</dt><dd>${fmtNum(c.pm2_5, 1)} µg/m³</dd></div><div><dt>PM10</dt><dd>${fmtNum(c.pm10, 1)} µg/m³</dd></div><div><dt>Ozone</dt><dd>${fmtNum(c.ozone, 0)} µg/m³</dd></div><div><dt>NO₂</dt><dd>${fmtNum(c.nitrogen_dioxide, 1)} µg/m³</dd></div><div><dt>CO</dt><dd>${fmtNum(c.carbon_monoxide, 0)} µg/m³</dd></div></dl>
         <div class="muted sm">AQI over the next 24 hours</div><div class="chart h120"><canvas id="c-aqi" aria-label="US AQI forecast for the next 24 hours"></canvas></div>` + srcLine(['aqi']);
       const h = d.hourly, now = c.time.slice(0, 13);
@@ -781,6 +1122,7 @@ view({
       lineChart('temp', $('#c-temp'), t, [{ label: 'Temperature', data: temp, color: css('--s1'), fill: true }], { xFmt, tipTitle, yFmt: v => Math.round(v) + '°' });
       barChart('rain', $('#c-rain'), t, rain, css('--s1'), { label: 'Chance of rain', xFmt, tipTitle, yFmt: v => v + '%', yMin: 0, yMax: 100 });
     } },
+    cardRegion('climate'),
     { sel: '#w-week', keys: ['weather'], render(el) {
       const top = head('Week ahead');
       const g = gate(['weather']); if (g) return el.innerHTML = top + g;
@@ -790,6 +1132,145 @@ view({
     } }
   ]
 });
+
+/* Air quality */
+function placeSearch(input, ul, onPick) {
+  let timer, seq = 0, results = [];
+  input.addEventListener('input', () => {
+    clearTimeout(timer);
+    const q = input.value.trim(), my = ++seq;
+    if (q.length < 2) { ul.innerHTML = ''; return; }
+    timer = setTimeout(async () => {
+      ul.innerHTML = '<li class="muted sm" style="padding:8px">Searching…</li>';
+      try {
+        const d = await getJSON(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=6&language=en&format=json`);
+        if (my !== seq) return;
+        results = d.results || [];
+        ul.innerHTML = results.length ? results.map((r, i) => `<li><button type="button" data-res="${i}">${esc(r.name)}<small>${esc([r.admin1, r.country].filter(Boolean).join(', '))}</small></button></li>`).join('') : '<li class="muted sm" style="padding:8px">No places match that name.</li>';
+      } catch (err) { if (my === seq) ul.innerHTML = `<li class="muted sm" style="padding:8px">${esc(err.message)}</li>`; }
+    }, 300);
+  });
+  ul.addEventListener('click', e => {
+    const b = e.target.closest('[data-res]'); if (!b) return;
+    const r = results[+b.dataset.res]; if (!r) return;
+    ul.innerHTML = ''; input.value = '';
+    onPick({ name: r.name, region: [r.admin1, r.country].filter(Boolean).join(', '), lat: r.latitude, lon: r.longitude });
+    input.focus();
+  });
+}
+function renderPlaceChips() {
+  const el = $('#pl-chips'); if (!el) return;
+  el.innerHTML = settings.places.map((p, i) => `<span class="chip"><i style="background:var(${SERIES[p.slot]})" aria-hidden="true"></i>${esc(p.name)}<button type="button" data-rmp="${i}" aria-label="Remove ${esc(p.name)}">×</button></span>`).join('') || '<span class="muted">No places yet. Search below to add one.</span>';
+  const q = $('#pl-q'); if (q) q.disabled = settings.places.length >= 8;
+}
+function addPlace(p) {
+  if (settings.places.length >= 8) { toast('Place list is full', 'Remove a place before adding another (8 at most).'); return; }
+  if (settings.places.some(x => Math.abs(x.lat - p.lat) < 0.01 && Math.abs(x.lon - p.lon) < 0.01)) { toast('Already saved', `${p.name} is already in your places.`); return; }
+  const used = new Set(settings.places.map(x => x.slot));
+  settings.places.push({ name: String(p.name).slice(0, 80), region: String(p.region || '').slice(0, 120), lat: +(+p.lat).toFixed(4), lon: +(+p.lon).toFixed(4), slot: [0, 1, 2, 3, 4, 5, 6, 7].find(s => !used.has(s)) });
+  save('places'); renderPlaceChips(); invalidate(['places']);
+}
+function renderPlacesChart(el) {
+  const top = head('Air forecast by place', 'Next 5 days, your time');
+  if (!settings.places.length) return el.innerHTML = top + '<p class="muted">Add places above to compare them.</p>';
+  const g = gate(['places']); if (g) return el.innerHTML = top + g;
+  const sets = S.data.places.list.filter(p => p.a && p.a.hourly).map(p => {
+    const i0 = nowIdx(p.a.hourly, p.a.current.time);
+    return { label: p.name, data: p.a.hourly.us_aqi.slice(i0, i0 + 120), color: css(SERIES[p.slot]) };
+  });
+  // Each place's series starts at its own current hour, so the x axis is "hours from now" shown in the viewer's time.
+  const n = Math.max(0, ...sets.map(s => s.data.length)), base = Math.floor(Date.now() / 3600e3) * 3600e3;
+  const labels = Array.from({ length: n }, (_, i) => new Date(base + i * 3600e3).toISOString());
+  el.innerHTML = top + `<div class="legend">${sets.map(s => `<span><i style="background:${s.color}"></i>${esc(s.label)}</span>`).join('')}</div><div class="chart h320"><canvas aria-label="Hourly US AQI forecast for each saved place"></canvas></div>` + srcLine(['places'], 'Open-Meteo Air Quality');
+  lineChart('aircmp', el.querySelector('canvas'), labels, sets, {
+    bands: true, allTicks: true, yMin: 0, yFmt: v => Math.round(v),
+    xFmt: l => { const d = new Date(l); return d.getHours() === 0 ? WD[d.getDay()] + ' ' + d.getDate() : ''; },
+    tipTitle: l => { const d = new Date(l); return WD[d.getDay()] + ' ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }); },
+    tipLabel: x => `${x.dataset.label}: ${Math.round(x.parsed.y)} · ${aqiCat(x.parsed.y).t}`
+  });
+}
+view({
+  id: 'air', label: 'Air quality', title: 'Air quality',
+  intro: 'How clean the air is where you are and in the places you care about: right now, over the next five days and over the last three months, plus the best time to head outside.',
+  mount(root) {
+    root.insertAdjacentHTML('beforeend', `<div class="g g-2">${cardHTML('aqnow', 'view')}${cardHTML('best', 'view')}</div>
+      ${cardHTML('aqfc', 'view')}
+      <section class="panel" id="air-places">${head('Compare places', 'Up to 8')}<div class="chips" id="pl-chips"></div>
+        <div class="place-add"><label class="field" for="pl-q"><span>Add a place</span><input id="pl-q" class="inp" type="search" placeholder="Delhi, London, Tokyo…" autocomplete="off"></label><ul id="pl-res" class="res-list" aria-label="Matching places"></ul></div></section>
+      ${cardHTML('places', 'view')}
+      <section class="panel" id="air-cmp"></section>
+      ${cardHTML('aqtrend', 'view')}`);
+    renderPlaceChips();
+    placeSearch($('#pl-q'), $('#pl-res'), addPlace);
+  },
+  regions: [cardRegion('aqnow'), cardRegion('best'), cardRegion('aqfc'), cardRegion('places'), { sel: '#air-cmp', keys: ['places'], render: renderPlacesChart }, cardRegion('aqtrend')]
+});
+
+/* Alerts and notices */
+function toast(title, body) {
+  const box = $('#toasts'); if (!box) return;
+  const t = document.createElement('div'); t.className = 'toast';
+  t.innerHTML = '<div><b></b><p></p></div><button type="button" class="icon-btn" aria-label="Dismiss">×</button>';
+  t.querySelector('b').textContent = title; t.querySelector('p').textContent = body;
+  t.querySelector('button').addEventListener('click', () => t.remove());
+  box.appendChild(t);
+  setTimeout(() => t.remove(), 12000);
+  while (box.children.length > 4) box.firstElementChild.remove();
+}
+let alertSeen = store.get('alertSeen', []);
+if (!Array.isArray(alertSeen)) alertSeen = [];
+function sendAlert(id, title, body, force) {
+  if (!force) {
+    if (alertSeen.includes(id)) return;
+    alertSeen.push(id); alertSeen = alertSeen.slice(-300); store.set('alertSeen', alertSeen);
+  }
+  try { if ('Notification' in window && Notification.permission === 'granted') new Notification(title, { body, icon: 'icon-192.png', tag: id }); } catch {}
+  toast(title, body);
+}
+const alertKeys = () => { const A = settings.alerts, k = []; if (A.aqi.on) k.push('aqi'); if (A.quake.on) k.push('qalert'); if (A.coin.on) k.push('crypto'); return k; };
+function checkAlerts(key) {
+  const A = settings.alerts, day = new Date().toISOString().slice(0, 10);
+  if (key === 'aqi' && A.aqi.on && S.data.aqi) {
+    const v = S.data.aqi.current.us_aqi;
+    if (fin(v) && v >= A.aqi.above) sendAlert(`aqi|${settings.city.lat},${settings.city.lon}|${day}|${A.aqi.above}`, `Air quality alert · ${settings.city.name}`, `US AQI is ${Math.round(v)} (${aqiCat(v).t}), at or above your limit of ${A.aqi.above}.`);
+  }
+  if ((key === 'qalert' || key === 'quakes') && A.quake.on && S.data[key]) {
+    S.data[key].features.forEach(q => {
+      const m = q.properties.mag;
+      if (fin(m) && mag1(m) >= A.quake.min && Date.now() - q.properties.time < 12 * 3600e3) sendAlert('q|' + q.id, `Earthquake M${mag1(m).toFixed(1)}`, `${q.properties.place || 'Unknown place'}, ${ago(q.properties.time)}.`);
+    });
+  }
+  if (key === 'crypto' && A.coin.on && S.data.crypto) {
+    const r = S.data.crypto.find(x => x.id === A.coin.id), p = r && r.price_change_percentage_24h_in_currency;
+    if (fin(p) && Math.abs(p) >= A.coin.pct) sendAlert(`c|${r.id}|${day}|${p > 0 ? 'up' : 'down'}`, `${r.name} ${p > 0 ? 'up' : 'down'} ${Math.abs(p).toFixed(1)}%`, `${r.name} is ${fmtMoney(r.current_price)}, ${p > 0 ? 'up' : 'down'} ${Math.abs(p).toFixed(1)}% in 24 hours.`);
+  }
+}
+const clampN = (v, lo, hi, d) => { v = parseFloat(v); return fin(v) ? Math.min(hi, Math.max(lo, v)) : d; };
+function renderAlerts(el) {
+  const A = settings.alerts, perm = 'Notification' in window ? Notification.permission : 'unsupported';
+  const coins = (S.data.crypto || []).map(r => [r.id, r.name]);
+  if (!coins.some(c => c[0] === A.coin.id)) coins.unshift([A.coin.id, A.coin.id]);
+  el.innerHTML = `${head('Alerts', 'While Open Pulse is open in a tab')}
+    <div class="alerts">
+      <label class="check" for="al-aqi"><input id="al-aqi" type="checkbox"${A.aqi.on ? ' checked' : ''}>Air in ${esc(settings.city.name)} reaches US AQI</label><input id="al-aqi-v" class="inp num-inp" type="number" min="1" max="500" value="${A.aqi.above}" aria-label="AQI limit">
+      <label class="check" for="al-q"><input id="al-q" type="checkbox"${A.quake.on ? ' checked' : ''}>An earthquake anywhere of magnitude</label><input id="al-q-v" class="inp num-inp" type="number" min="4.5" max="9.5" step="0.1" value="${A.quake.min}" aria-label="Minimum magnitude">
+      <label class="check" for="al-c"><input id="al-c" type="checkbox"${A.coin.on ? ' checked' : ''}>A 24-hour price move of at least (%)</label><input id="al-c-v" class="inp num-inp" type="number" min="1" max="90" step="0.5" value="${A.coin.pct}" aria-label="Percent move">
+      <label class="field" for="al-c-id" style="grid-column:1/-1"><span>Coin to watch</span><select id="al-c-id" class="btn">${coins.map(([id, n]) => `<option value="${esc(id)}"${id === A.coin.id ? ' selected' : ''}>${esc(n)}</option>`).join('')}</select></label>
+    </div>
+    <div class="bar">${perm === 'granted' ? pill('Browser notifications on', 'good') : perm === 'denied' ? '<span class="muted sm">Notifications are blocked for this site, so alerts show on the page only. You can allow them in your browser’s site settings.</span>' : perm === 'unsupported' ? '<span class="muted sm">This browser can’t show notifications, so alerts show on the page only.</span>' : '<button id="al-perm" class="btn" type="button">Allow browser notifications</button>'}<button id="al-test" class="btn sm" type="button">Send a test alert</button></div>
+    <p class="muted sm" style="margin:0">Each event alerts you once. Checks run on the normal refresh: air every 30 minutes, earthquakes every 3 minutes, prices every 2 minutes.</p>`;
+  const upd = () => {
+    A.aqi = { on: $('#al-aqi').checked, above: Math.round(clampN($('#al-aqi-v').value, 1, 500, 150)) };
+    A.quake = { on: $('#al-q').checked, min: clampN($('#al-q-v').value, 4.5, 9.5, 6) };
+    A.coin = { on: $('#al-c').checked, pct: clampN($('#al-c-v').value, 1, 90, 5), id: $('#al-c-id').value || 'bitcoin' };
+    save('alerts');
+    alertKeys().forEach(k => { if (S.data[k] !== undefined) checkAlerts(k); });
+    tick();
+  };
+  el.querySelectorAll('input, select').forEach(i => i.addEventListener('change', upd));
+  const pb = $('#al-perm'); if (pb) pb.addEventListener('click', async () => { try { await Notification.requestPermission(); } catch {} renderAlerts(el); });
+  $('#al-test').addEventListener('click', () => sendAlert('test', 'Test alert', 'Alerts are working. Real ones appear here, and as notifications if you allowed them.', true));
+}
 
 /* Markets */
 view({
@@ -895,15 +1376,18 @@ view({
 /* Earthquakes */
 const feedLabel = () => `${{ 'significant': 'Significant', '4.5': 'M4.5+', '2.5': 'M2.5+', '1.0': 'M1+', 'all': 'All' }[settings.quakeLevel]} quakes in the past ${settings.quakePeriod}`;
 view({
-  id: 'earth', label: 'Earthquakes', title: 'Earthquakes around the world',
-  intro: 'Every earthquake the US Geological Survey has recorded in the window you choose. Bigger circles are stronger quakes. Click one in the list to find it on the map.',
+  id: 'earth', label: 'Earth events', title: 'Earthquakes and natural events',
+  intro: 'Every earthquake the US Geological Survey has recorded in the window you choose, plus the wildfires, storms and volcanoes NASA is tracking. Bigger circles are stronger quakes. Click a quake in the list to find it on the map.',
   mount(root) {
     const sel = (id, opts, val) => `<select id="${id}" class="btn">${opts.map(([v, t]) => `<option value="${v}"${v === val ? ' selected' : ''}>${t}</option>`).join('')}</select>`;
     root.insertAdjacentHTML('beforeend', `<div class="bar"><label class="field" for="q-level"><span>Strength</span>${sel('q-level', [['significant', 'Significant only'], ['4.5', 'Magnitude 4.5+'], ['2.5', 'Magnitude 2.5+'], ['1.0', 'Magnitude 1+'], ['all', 'All recorded']], settings.quakeLevel)}</label>
-      <label class="field" for="q-period"><span>Window</span>${sel('q-period', [['hour', 'Past hour'], ['day', 'Past day'], ['week', 'Past week'], ['month', 'Past month']], settings.quakePeriod)}</label></div>
+      <label class="field" for="q-period"><span>Window</span>${sel('q-period', [['hour', 'Past hour'], ['day', 'Past day'], ['week', 'Past week'], ['month', 'Past month']], settings.quakePeriod)}</label>
+      <label class="check" for="q-ev"><input id="q-ev" type="checkbox"${settings.showEvents ? ' checked' : ''}>Show NASA natural events on the map</label></div>
       <section class="panel" id="q-stats"></section>
-      <section class="panel"><div class="map" id="q-mapbox" role="region" aria-label="Map of earthquakes"></div><div id="q-map"></div></section>
-      <div class="g g-wide"><section class="panel" id="q-list"></section><section class="panel" id="q-hist"></section></div>`);
+      <section class="panel"><div class="map" id="q-mapbox" role="region" aria-label="Map of earthquakes and natural events"></div><div id="q-map"></div><div id="q-evmap"></div>
+        <div class="legend"><span><i style="background:var(--s2);border-radius:50%"></i>Earthquake (size = magnitude)</span>${Object.keys(EV).slice(0, 4).map(k => `<span><i class="ev-key" style="border-color:var(${EV[k].c})"></i>${EV[k].n}</span>`).join('')}</div></section>
+      <div class="g g-wide"><section class="panel" id="q-list"></section><section class="panel" id="q-hist"></section></div>
+      ${cardHTML('events', 'view')}`);
     const onSel = () => {
       settings.quakeLevel = $('#q-level').value; settings.quakePeriod = $('#q-period').value; save('quakeLevel'); save('quakePeriod');
       if (settings.quakeLevel === 'all' && settings.quakePeriod === 'month') { settings.quakePeriod = 'week'; $('#q-period').value = 'week'; save('quakePeriod'); }
@@ -911,7 +1395,9 @@ view({
     };
     $('#q-level').addEventListener('change', debounce(onSel)); $('#q-period').addEventListener('change', debounce(onSel));
     const m = makeMap($('#q-mapbox'));
-    if (m) maps.q = { map: m, layer: L.layerGroup().addTo(m), byId: {} };
+    if (m) maps.q = { map: m, layer: L.layerGroup().addTo(m), ev: L.layerGroup(), byId: {} };
+    if (m && settings.showEvents) maps.q.ev.addTo(m);
+    $('#q-ev').addEventListener('change', e => { settings.showEvents = e.target.checked; save('showEvents'); if (maps.q) { if (settings.showEvents) maps.q.ev.addTo(maps.q.map); else maps.q.ev.remove(); } });
   },
   regions: [
     { sel: '#q-stats', keys: ['quakes'], render(el) {
@@ -934,6 +1420,18 @@ view({
         mk.addTo(M.layer); M.byId[q.id] = mk;
       });
     } },
+    { sel: '#q-evmap', keys: ['events'], render() {
+      const M = maps.q; if (!M || !S.data.events) return;
+      M.ev.clearLayers();
+      S.data.events.forEach(e => {
+        const p = evPoint(e); if (!p) return;
+        const meta = evMeta(evCat(e)), col = css(meta.c);
+        L.circleMarker([p.lat, p.lon], { radius: 5, color: col, weight: 2.5, fillColor: css('--panel'), fillOpacity: 0.9 })
+          .bindPopup(`<b>${esc(e.title)}</b><br>${esc(meta.n)}${p.date ? ' · updated ' + esc(ago(Date.parse(p.date))) : ''}${fin(p.mag) ? ' · ' + esc(p.mag + ' ' + (p.unit || '')) : ''}<br><a href="${safeUrl((e.sources && e.sources[0] && e.sources[0].url) || e.link)}" target="_blank" rel="noopener">Source</a>`)
+          .addTo(M.ev);
+      });
+    } },
+    cardRegion('events'),
     { sel: '#q-list', keys: ['quakes'], render(el) {
       const top = `<div class="ph"><h2>Quake list</h2><div class="seg" role="group" aria-label="Sort quakes">${[['time', 'Latest'], ['mag', 'Strongest']].map(([k, t]) => `<button type="button" data-qsort="${k}" aria-pressed="${settings.quakeSort === k}">${t}</button>`).join('')}</div></div>`;
       const g = gate(['quakes']); if (g) return el.innerHTML = top + g;
@@ -1143,7 +1641,7 @@ view({
 /* ---------- router & rendering ---------- */
 let current = null, currentId = null;
 const viewKeys = v => [...new Set(v.regions.flatMap(r => r.keys))];
-const FOCUS_KEYS = ['coin', 'quake', 'qsort', 'fx', 'rmc', 'retry'];
+const FOCUS_KEYS = ['coin', 'quake', 'qsort', 'fx', 'rmc', 'retry', 'pin', 'mv', 'usep'];
 function renderRegion(r) {
   const el = $(r.sel); if (!el) return;
   // A refresh rebuilds the panel; put keyboard focus back on the same control afterwards.
@@ -1193,6 +1691,24 @@ document.addEventListener('click', e => {
   const f = t.closest('[data-fx]'); if (f) { settings.fxPair = f.dataset.fx; save('fxPair'); renderKey('fx'); invalidate(['fxHist']); return; }
   const q = t.closest('[data-qsort]'); if (q) { settings.quakeSort = q.dataset.qsort; save('quakeSort'); renderKey('quakes'); return; }
   const qk = t.closest('[data-quake]'); if (qk && maps.q) { const mk = maps.q.byId[qk.dataset.quake]; if (mk) { $('#q-mapbox').scrollIntoView({ behavior: RM ? 'auto' : 'smooth', block: 'center' }); if (RM) { maps.q.map.setView(mk.getLatLng(), 5); mk.openPopup(); } else { maps.q.map.flyTo(mk.getLatLng(), 5, { duration: 1 }); setTimeout(() => mk.openPopup(), 1000); } } return; }
+  const pn = t.closest('[data-pin]'); if (pn) {
+    const id = pn.dataset.pin, i = settings.pins.indexOf(id), on = i < 0;
+    if (on) settings.pins.push(id); else settings.pins.splice(i, 1);
+    save('pins');
+    document.querySelectorAll(`[data-pin="${id}"]`).forEach(b => { b.setAttribute('aria-pressed', String(on)); b.textContent = on ? 'Pinned' : 'Pin'; b.setAttribute('aria-label', `${on ? 'Remove' : 'Add'} ${CARDS[id].name} ${on ? 'from' : 'to'} My dashboard`); });
+    toast(on ? 'Pinned to My dashboard' : 'Removed from My dashboard', CARDS[id].name);
+    return;
+  }
+  const mv = t.closest('[data-mv]'); if (mv) {
+    const [id, d] = mv.dataset.mv.split('|'), i = settings.pins.indexOf(id), j = i + +d;
+    if (i < 0 || j < 0 || j >= settings.pins.length) return;
+    [settings.pins[i], settings.pins[j]] = [settings.pins[j], settings.pins[i]]; save('pins'); go('mine');
+    const b = document.querySelector(`[data-mv="${CSS.escape(mv.dataset.mv)}"]`); if (b) b.focus();
+    return;
+  }
+  const un = t.closest('[data-unpin]'); if (un) { settings.pins = settings.pins.filter(x => x !== un.dataset.unpin); save('pins'); go('mine'); return; }
+  const us = t.closest('[data-usep]'); if (us) { const p = settings.places[+us.dataset.usep]; if (p) setCity({ name: p.name, region: p.region, lat: p.lat, lon: p.lon }); return; }
+  const rp = t.closest('[data-rmp]'); if (rp) { settings.places = settings.places.filter((_, i) => i !== +rp.dataset.rmp); save('places'); renderPlaceChips(); invalidate(['places']); return; }
   const rm = t.closest('[data-rmc]'); if (rm) { settings.wbCountries = settings.wbCountries.filter(x => x.id !== rm.dataset.rmc); save('wbCountries'); renderChips(); renderKey('wbCountries'); invalidate(['wb']); return; }
 });
 document.addEventListener('keydown', e => {
@@ -1213,7 +1729,8 @@ function setCity(c) {
   settings.city = c; save('city');
   $('#city-name').textContent = c.name;
   closeCity(true);
-  invalidate(['weather', 'aqi']);
+  invalidate(['weather', 'aqi', 'climate']);
+  renderKey('places');
 }
 function closeCity(refocus) {
   if ($('#city-pop').hidden) return;
@@ -1276,14 +1793,51 @@ try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () =
 function tick() {
   document.querySelectorAll('[data-at]').forEach(s => { s.textContent = ago(+s.dataset.at); });
   if (document.hidden || !current) return;
-  viewKeys(current).forEach(ensure);
+  [...new Set([...viewKeys(current), ...alertKeys()])].forEach(ensure);
 }
 setInterval(tick, 5000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
 
+/* share a link to this view and place */
+$('#share').addEventListener('click', async () => {
+  const c = settings.city, u = new URL(location.href);
+  u.search = new URLSearchParams({ place: c.name, lat: (+c.lat).toFixed(4), lon: (+c.lon).toFixed(4) }).toString();
+  u.hash = currentId || '';
+  const link = u.toString();
+  try { if (navigator.share && matchMedia('(pointer: coarse)').matches) { await navigator.share({ title: 'Open Pulse · ' + c.name, url: link }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+  try { await navigator.clipboard.writeText(link); toast('Link copied', `Anyone who opens it sees this page for ${c.name}.`); }
+  catch { toast('Copy this link', link); }
+});
+// A shared link carries ?place=&lat=&lon= (or ?city=Name); apply it once, then tidy the address bar.
+function applyLinkPlace() {
+  const q = new URLSearchParams(location.search), lat = parseFloat(q.get('lat')), lon = parseFloat(q.get('lon'));
+  const tidy = () => { try { history.replaceState(null, '', location.pathname + location.hash); } catch {} };
+  if (fin(lat) && fin(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180) {
+    settings.city = { name: String(q.get('place') || 'Shared place').slice(0, 80), region: `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`, lat, lon }; save('city');
+    $('#city-name').textContent = settings.city.name; tidy();
+  } else if (q.get('city')) {
+    const name = q.get('city').slice(0, 80); tidy();
+    getJSON(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=1&language=en&format=json`)
+      .then(d => { const r = d.results && d.results[0]; if (r) setCity({ name: r.name, region: [r.admin1, r.country].filter(Boolean).join(', '), lat: r.latitude, lon: r.longitude }); else toast('Place not found', `No place called “${name}”.`); })
+      .catch(() => {});
+  }
+}
+
+/* install as an app, offline notice */
+let installEvt = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; $('#install').hidden = false; });
+window.addEventListener('appinstalled', () => { installEvt = null; $('#install').hidden = true; toast('Installed', 'Open Pulse is now on your device.'); });
+$('#install').addEventListener('click', async () => { if (!installEvt) return; installEvt.prompt(); try { await installEvt.userChoice; } catch {} installEvt = null; $('#install').hidden = true; });
+const netState = () => { $('#offline').hidden = navigator.onLine; };
+window.addEventListener('offline', netState);
+window.addEventListener('online', () => { netState(); if (current) viewKeys(current).forEach(k => { S.fail[k] = 0; load(k); }); });
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(e => console.warn('[Open Pulse] offline support unavailable', e)); });
+}
+
 /* boot */
 if (window.Chart) { Chart.defaults.font.family = getComputedStyle(document.body).fontFamily; }
-applyTheme(); buildNav();
+applyTheme(); buildNav(); applyLinkPlace(); netState();
 go(location.hash.slice(1) || 'overview');
 })();
 </script>
